@@ -1,9 +1,11 @@
+import prisma from "../../common/prisma";
+
 export class AuthRepository {
-  login(): { message: string } {
-    return { message: "login ok" };
+  getUserByEmail(email: string) {
+    return prisma.user.findUnique({ where: { email } });
   }
 
-  register(): { message: string } {
-    return { message: "register ok" };
+  createUser(data: { name: string; email: string; passwordHash: string }) {
+    return prisma.user.create({ data });
   }
 }

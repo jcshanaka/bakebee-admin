@@ -1,5 +1,9 @@
+import prisma from "../../common/prisma";
+import { AdminSummary } from "./admin.types";
+
 export class AdminRepository {
-  getSummary(): { message: string } {
-    return { message: "admin summary" };
+  async getSummary(): Promise<AdminSummary> {
+    const users = await prisma.user.count();
+    return { users, orders: 0 };
   }
 }

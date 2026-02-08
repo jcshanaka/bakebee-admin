@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 
 import { TypedRequest } from "../../common/types";
 import { AuthService } from "./auth.service";
@@ -6,15 +6,28 @@ import { LoginBody, RegisterBody } from "./auth.dto";
 
 const authService = new AuthService();
 
-export const login = (req: TypedRequest<{}, {}, LoginBody, {}>, res: Response): void => {
-  const result = authService.login();
-  res.json(result);
+export const login = async (
+  req: TypedRequest<{}, {}, LoginBody, {}>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result = await authService.login(req.body);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const register = (
+export const register = async (
   req: TypedRequest<{}, {}, RegisterBody, {}>,
-  res: Response
-): void => {
-  const result = authService.register();
-  res.json(result);
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result = await authService.register(req.body);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
 };

@@ -1,10 +1,18 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 import { AdminService } from "./admin.service";
 
 const adminService = new AdminService();
 
-export const getSummary = (req: Request, res: Response): void => {
-  const result = adminService.getSummary();
-  res.json(result);
+export const getSummary = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result = await adminService.getSummary();
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
 };
