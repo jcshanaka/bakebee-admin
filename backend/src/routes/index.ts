@@ -1,7 +1,9 @@
 import { Router, Request, Response } from "express";
 
-import authRoutes from "../modules/auth/auth.routes";
-import adminRoutes from "../modules/admin/admin.routes";
+import authRoutes from "../modules/auth/routes/auth.routes";
+import adminRoutes from "../modules/admin/routes/admin.routes";
+import categoriesRoutes from "../modules/categories/routes/categories.routes";
+import subCategoriesRoutes from "../modules/sub-categories/routes/sub-categories.routes";
 
 const router = Router();
 
@@ -41,5 +43,7 @@ router.get("/health", (req: Request, res: Response) => {
 
 router.use("/auth", authRoutes);
 router.use("/admin", adminRoutes);
+router.use("/categories", categoriesRoutes);
+router.use("/sub-categories", subCategoriesRoutes);
 
 export default router;
