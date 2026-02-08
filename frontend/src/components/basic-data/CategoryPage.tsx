@@ -7,52 +7,79 @@ import Input from "../form/input/InputField";
 import Switch from "../form/switch/Switch";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import { PlusIcon } from "../../icons";
+import { useCategoriesQuery, useCreateCategoryMutation, useUpdateCategoryMutation, useUpdateCategoryStatusMutation } from "../../lib/hooks/useCategories";
+import type { Category } from "../../lib/services/backend-api-generated/models";
 
-type CategoryRow = {
-  id: string;
-  category_name: string;
-  is_active: boolean;
-};
-
-const seedCategories: CategoryRow[] = [
-  {
-    id: "c-1",
-    category_name: "Breads",
-    is_active: true,
-  },
-  {
-    id: "c-2",
-    category_name: "Pastries",
-    is_active: true,
-  },
-  {
-    id: "c-3",
-    category_name: "Cakes",
-    is_active: false,
-  },
-];
-
-const CategoryPage = () => {
+const CategoryPageIntegrated = () => {
   const addModal = useModal();
   const editModal = useModal();
 
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryActive, setNewCategoryActive] = useState(true);
-  const [editCategory, setEditCategory] = useState<CategoryRow | null>(null);
+  const [editCategory, setEditCategory] = useState<Category | null>(null);
   const [editName, setEditName] = useState("");
   const [editActive, setEditActive] = useState(true);
 
-  const handleOpenEdit = (category: CategoryRow) => {
+  // React Query hooks
+  const { data: categories = [], isLoading, error } = useCategoriesQuery();
+  const createCategoryMutation = useCreateCategoryMutation();
+  const updateCategoryMutation = useUpdateCategoryMutation();
+  const updateStatusMutation = useUpdateCategoryStatusMutation();
+
+  const handleOpenEdit = (category: Category) => {
     setEditCategory(category);
-    setEditName(category.category_name);
-    setEditActive(category.is_active);
+    setEditName(category.category_name || "");
+    setEditActive(category.is_active ?? true);
     editModal.openModal();
   };
+
+  const handleCreate = async () => {
+    if (!newCategoryName.trim()) return;
+
+    try {
+      await createCategoryMutation.mutateAsync({
+        category_name: newCategoryName,
+      });
+      
+      // Reset form
+      setNewCategoryName("");
+      setNewCategoryActive(true);
+      addModal.closeModal();
+    } catch (error) {
+      console.error('Failed to create category:', error);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!editCategory?.id || !editName.trim()) return;
+
+    try {
+      await updateCategoryMutation.mutateAsync({
+        id: editCategory.id,
+        data: { category_name: editName },
+      });
+
+      // Update status if changed
+      if (editActive !== editCategory.is_active) {
+        await updateStatusMutation.mutateAsync({
+          id: editCategory.id,
+          data: { is_active: editActive },
+        });
+      }
+
+      editModal.closeModal();
+    } catch (error) {
+      console.error('Failed to update category:', error);
+    }
+  };
+
+  if (error) {
+    return <div className="text-red-500">Error loading categories: {error.message}</div>;
+  }
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-end gap-3">
-        
         <Button
           size="sm"
           onClick={addModal.openModal}
@@ -79,33 +106,48 @@ const CategoryPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-gray-100 text-sm text-gray-700 dark:divide-white/[0.05] dark:text-gray-200">
-              {seedCategories.map((category) => (
-                <TableRow key={category.id} className="bg-white dark:bg-white/[0.02]">
-                  <TableCell className="px-5 py-4 font-medium text-gray-900 dark:text-white/90">
-                    {category.category_name}
-                  </TableCell>
-                  <TableCell className="px-5 py-4">
-                    <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                        category.is_active
-                          ? "bg-success-50 text-success-700 dark:bg-success-500/10 dark:text-success-400"
-                          : "bg-gray-100 text-gray-600 dark:bg-white/[0.08] dark:text-gray-300"
-                      }`}
-                    >
-                      {category.is_active ? "Active" : "Inactive"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-end">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleOpenEdit(category)}
-                    >
-                      Edit
-                    </Button>
-                  </TableCell>
+              {isLoading ? (
+                <TableRow>
+                  <td colSpan={3} className="px-5 py-4 text-center">
+                    Loading categories...
+                  </td>
                 </TableRow>
-              ))}
+              ) : categories.length === 0 ? (
+                <TableRow>
+                  <td colSpan={3} className="px-5 py-4 text-center">
+                    No categories found
+                  </td>
+                </TableRow>
+              ) : (
+                categories.map((category) => (
+                  <TableRow key={category.id} className="bg-white dark:bg-white/[0.02]">
+                    <TableCell className="px-5 py-4 font-medium text-gray-900 dark:text-white/90">
+                      {category.category_name}
+                    </TableCell>
+                    <TableCell className="px-5 py-4">
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                          category.is_active
+                            ? "bg-success-50 text-success-700 dark:bg-success-500/10 dark:text-success-400"
+                            : "bg-gray-100 text-gray-600 dark:bg-white/[0.08] dark:text-gray-300"
+                        }`}
+                      >
+                        {category.is_active ? "Active" : "Inactive"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-5 py-4 text-end">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleOpenEdit(category)}
+                        disabled={updateCategoryMutation.isPending || updateStatusMutation.isPending}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -148,11 +190,20 @@ const CategoryPage = () => {
           </div>
 
           <div className="mt-8 flex flex-wrap justify-end gap-3">
-            <Button variant="outline" size="sm" onClick={addModal.closeModal}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={addModal.closeModal}
+              disabled={createCategoryMutation.isPending}
+            >
               Cancel
             </Button>
-            <Button size="sm" onClick={addModal.closeModal}>
-              Save Category
+            <Button
+              size="sm"
+              onClick={handleCreate}
+              disabled={createCategoryMutation.isPending || !newCategoryName.trim()}
+            >
+              {createCategoryMutation.isPending ? "Creating..." : "Save Category"}
             </Button>
           </div>
         </div>
@@ -195,11 +246,26 @@ const CategoryPage = () => {
           </div>
 
           <div className="mt-8 flex flex-wrap justify-end gap-3">
-            <Button variant="outline" size="sm" onClick={editModal.closeModal}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={editModal.closeModal}
+              disabled={updateCategoryMutation.isPending || updateStatusMutation.isPending}
+            >
               Cancel
             </Button>
-            <Button size="sm" onClick={editModal.closeModal}>
-              Save Changes
+            <Button
+              size="sm"
+              onClick={handleUpdate}
+              disabled={
+                updateCategoryMutation.isPending ||
+                updateStatusMutation.isPending ||
+                !editName.trim()
+              }
+            >
+              {updateCategoryMutation.isPending || updateStatusMutation.isPending
+                ? "Saving..."
+                : "Save Changes"}
             </Button>
           </div>
         </div>
@@ -208,4 +274,4 @@ const CategoryPage = () => {
   );
 };
 
-export default CategoryPage;
+export default CategoryPageIntegrated;

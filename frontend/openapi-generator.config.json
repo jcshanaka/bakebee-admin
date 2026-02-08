@@ -1,0 +1,15 @@
+{
+  "generatorName": "typescript-axios",
+  "inputSpec": "backend-api.openapi.json",
+  "outputDir": "src/lib/services/backend-api-generated",
+  "additionalProperties": {
+    "useSingleRequestParameter": true,
+    "withSeparateModelsAndApi": true,
+    "modelPropertyNaming": "snake_case",
+    "supportsES6": true,
+    "npmName": "backend-api-client",
+    "npmVersion": "1.0.0",
+    "apiPackage": "api",
+    "modelPackage": "models"
+  }
+}

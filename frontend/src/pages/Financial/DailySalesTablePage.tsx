@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  CalenderIcon as CalendarIcon,
   CheckCircleIcon,
-  DollarLineIcon,
   BoxIcon,
   PlusIcon,
   DownloadIcon,
@@ -12,9 +10,6 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import { Table, TableHeader, TableBody, TableRow, TableCell } from "../../components/ui/table";
 import DatePicker from "../../components/form/date-picker";
-
-// Ensure a direct Calendar export for compatibility with prior usage
-const Calendar = CalendarIcon;
 
 type Product = {
   id: string;

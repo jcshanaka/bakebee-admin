@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "sync-api": "node ./scripts/sync-api.mjs"
+    "sync-api": "node ./scripts/sync-api.mjs",
+    "yarn:codegen": "npx openapi-generator-cli generate -c openapi-generator.config.json"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.15",
@@ -19,7 +20,10 @@
     "@fullcalendar/timegrid": "^6.1.15",
     "@react-jvectormap/core": "^1.0.4",
     "@react-jvectormap/world": "^1.1.2",
+    "@tanstack/react-query": "^5.66.0",
+    "@tanstack/react-query-devtools": "^5.91.3",
     "apexcharts": "^4.1.0",
+    "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "flatpickr": "^4.6.13",
     "react": "^19.0.0",
@@ -36,6 +40,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
+    "@openapitools/openapi-generator-cli": "^2.16.3",
     "@tailwindcss/postcss": "^4.0.8",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
