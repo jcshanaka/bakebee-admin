@@ -7,6 +7,7 @@ import {
   GridIcon,
   HorizontaLDots,
   DollarLineIcon,
+  TableIcon,
  
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -32,6 +33,12 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Daily Sales", path: "/financial/daily-sales" },
     ],
+  },
+
+  {
+    icon: <TableIcon />,
+    name: "Basic Data",
+    subItems: [{ name: "Basic Data", path: "/basic-data" }],
   },
  
 ];

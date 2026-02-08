@@ -3,6 +3,7 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import DailySalesTablePage from "./pages/Financial/DailySalesTablePage";
+import BasicDataPage from "./pages/BasicData/BasicDataPage";
 
 
 // Simple NotFound component for fallback route
@@ -27,6 +28,9 @@ export default function App() {
               path="/financial/daily-sales"
               element={<DailySalesTablePage />}
             />
+
+            {/* Basic Data */}
+            <Route path="/basic-data" element={<BasicDataPage />} />
           </Route>
 
           {/* Fallback Route */}
